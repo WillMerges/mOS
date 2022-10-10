@@ -261,12 +261,12 @@ static void yod_get_available_lwkcpus(mos_cpuset_t *set)
 	if (plugin->get_designated_lwkcpus(set))
 		yod_abort(-1, "Could not obtain designated LWK CPU list from plugin.");
 
-	// if (plugin->get_reserved_lwk_cpus(reserved_lwkcpus)) {
-	// 	yod_abort(-1,
-	// 	  "Could not obtain reserved LWK CPU list from plugin.");
-	// }
+	if (plugin->get_reserved_lwk_cpus(reserved_lwkcpus)) {
+		yod_abort(-1,
+		  "Could not obtain reserved LWK CPU list from plugin.");
+	}
 
-	// mos_cpuset_xor(set, set, reserved_lwkcpus);
+	mos_cpuset_xor(set, set, reserved_lwkcpus);
 }
 
 /**
@@ -919,10 +919,10 @@ static void all_available_lwkcpus_resolver(lwk_request_t *this)
 	/* Resolver for "--cpus all" option */
 	yod_get_available_lwkcpus(this->lwkcpus_request);
 
-	if (mos_cpuset_is_empty(this->lwkcpus_request)) {
-		show_state(YOD_CRIT);
-		yod_abort(-EBUSY, "No LWK CPUs are available.");
-	}
+	// if (mos_cpuset_is_empty(this->lwkcpus_request)) {
+	// 	show_state(YOD_CRIT);
+	// 	yod_abort(-EBUSY, "No LWK CPUs are available.");
+	// }
 }
 
 static void all_available_lwk_cores_resolver(lwk_request_t *this)
@@ -949,13 +949,13 @@ static void lwkcpus_by_list_resolver(lwk_request_t *this)
 	 * were actually requested.
 	 */
 
-	if (mos_cpuset_is_empty(requested_lwk_cpus)) {
-		if (all_lwk_cpus_specified) {
-			show_state(YOD_CRIT);
-			yod_abort(-EBUSY, "No LWK CPUs are available.");
-		} else
-			yod_abort(-EINVAL, "No LWK CPUs were requested.");
-	}
+	// if (mos_cpuset_is_empty(requested_lwk_cpus)) {
+	// 	if (all_lwk_cpus_specified) {
+	// 		show_state(YOD_CRIT);
+	// 		yod_abort(-EBUSY, "No LWK CPUs are available.");
+	// 	} else
+	// 		yod_abort(-EINVAL, "No LWK CPUs were requested.");
+	// }
 
 	non_lwkcpus = check_for_non_lwk_cpus(requested_lwk_cpus);
 

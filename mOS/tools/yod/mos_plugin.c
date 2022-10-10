@@ -149,10 +149,6 @@ static int mos_sysfs_put_cpulist(const char *file, mos_cpuset_t *set)
 	int rc;
 	char* list;
 
-	// only reserve what isn't already reserved
-	mos_cpuset_t *reserved_lwkcpus = mos_cpuset_alloc_validate();
-	mos_cpuset_xor(set, set, reserved_lwkcpus);
-
 	list = mos_cpuset_to_list_validate(set);
 
 	rc = mos_sysfs_write(file, list, strlen(list));
@@ -565,7 +561,7 @@ static int mos_request_lwk_memory(size_t *mem, size_t n)
 			if (rc >= ((int)(sizeof(buffer) - len)))
 				yod_abort(-1, "Buffer overflow when writing to %s", MOS_SYSFS_LWKMEM_REQUEST);
 		}
-		return mos_sysfs_write(MOS_SYSFS_LWKMEM_REQUEST, buffer, strlen(buffer) + 1);
+		return mos_sysfs_write(MOS_SYSFS_LWKMEM_REQUEST, buffer, sWtrlen(buffer) + 1);
 	}
 }
 
