@@ -150,7 +150,7 @@ static int mos_sysfs_put_cpulist(const char *file, mos_cpuset_t *set)
 	char* list;
 
 	// only reserve what isn't already reserved
-	reserved_lwkcpus = mos_cpuset_alloc_validate();
+	mos_cpuset_t *reserved_lwkcpus = mos_cpuset_alloc_validate();
 	mos_cpuset_xor(set, set, reserved_lwkcpus);
 
 	list = mos_cpuset_to_list_validate(set);
