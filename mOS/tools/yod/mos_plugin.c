@@ -565,7 +565,7 @@ static int mos_request_lwk_memory(size_t *mem, size_t n)
 			if (rc >= ((int)(sizeof(buffer) - len)))
 				yod_abort(-1, "Buffer overflow when writing to %s", MOS_SYSFS_LWKMEM_REQUEST);
 		}
-		return mos_sysfs_write(MOS_SYSFS_LWKMEM_REQUEST, buffer, sWtrlen(buffer) + 1);
+		return mos_sysfs_write(MOS_SYSFS_LWKMEM_REQUEST, buffer, strlen(buffer) + 1);
 	}
 }
 
