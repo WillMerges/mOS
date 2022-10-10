@@ -261,12 +261,12 @@ static void yod_get_available_lwkcpus(mos_cpuset_t *set)
 	if (plugin->get_designated_lwkcpus(set))
 		yod_abort(-1, "Could not obtain designated LWK CPU list from plugin.");
 
-	if (plugin->get_reserved_lwk_cpus(reserved_lwkcpus)) {
-		yod_abort(-1,
-		  "Could not obtain reserved LWK CPU list from plugin.");
-	}
+	// if (plugin->get_reserved_lwk_cpus(reserved_lwkcpus)) {
+	// 	yod_abort(-1,
+	// 	  "Could not obtain reserved LWK CPU list from plugin.");
+	// }
 
-	mos_cpuset_xor(set, set, reserved_lwkcpus);
+	// mos_cpuset_xor(set, set, reserved_lwkcpus);
 }
 
 /**
