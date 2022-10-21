@@ -256,6 +256,7 @@ static mos_cpuset_t *get_designated_lwkcpus(void)
  */
 static void yod_get_available_lwkcpus(mos_cpuset_t *set)
 {
+	// TODO we don't check if CPUs are reserved by another lwkprocess for now
 	// reserved_lwkcpus = mos_cpuset_alloc_validate();
 
 	if (plugin->get_designated_lwkcpus(set))

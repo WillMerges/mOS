@@ -274,8 +274,9 @@ void mos_exit_thread(void)
 
 	/* Release the resources reserved by this process. */
 
-	cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
-		    process->lwkcpus);
+	// TODO have a new way to release
+	// cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
+	// 	    process->lwkcpus);
 
 	/* Free process resources. */
 	free_cpumask_var(process->lwkcpus);
@@ -378,11 +379,12 @@ static int _cpus_request_set(cpumask_var_t request, cpumask_var_t target)
 		goto out;
 	}
 
-	if (cpumask_intersects(request, lwkcpus_reserved_map)) {
-		pr_info("Reserved LWK CPU was requested.\n");
-		rc = -EBUSY;
-		goto out;
-	}
+	// TODO we no longer check if the cpumask intersects
+	// if (cpumask_intersects(request, lwkcpus_reserved_map)) {
+	// 	pr_info("Reserved LWK CPU was requested.\n");
+	// 	rc = -EBUSY;
+	// 	goto out;
+	// }
 
 	cpumask_or(target, target, request);
 out:
@@ -439,11 +441,12 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 	}
 
  out:
-	if (rc) {
-		/* In case of error clear the CPUs that we marked reserved */
-		cpumask_andnot(lwkcpus_reserved_map,
-			       lwkcpus_reserved_map, request);
-	}
+ 	// TODO we longer reserve CPUs so no need to clear them
+	// if (rc) {
+	// 	/* In case of error clear the CPUs that we marked reserved */
+	// 	cpumask_andnot(lwkcpus_reserved_map,
+	// 		       lwkcpus_reserved_map, request);
+	// }
 	return rc;
 }
 
