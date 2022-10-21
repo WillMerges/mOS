@@ -256,17 +256,17 @@ static mos_cpuset_t *get_designated_lwkcpus(void)
  */
 static void yod_get_available_lwkcpus(mos_cpuset_t *set)
 {
-	reserved_lwkcpus = mos_cpuset_alloc_validate();
+	// reserved_lwkcpus = mos_cpuset_alloc_validate();
 
 	if (plugin->get_designated_lwkcpus(set))
 		yod_abort(-1, "Could not obtain designated LWK CPU list from plugin.");
 
-	if (plugin->get_reserved_lwk_cpus(reserved_lwkcpus)) {
-		yod_abort(-1,
-		  "Could not obtain reserved LWK CPU list from plugin.");
-	}
-
-	mos_cpuset_xor(reserved_lwkcpus, set, reserved_lwkcpus);
+	// if (plugin->get_reserved_lwk_cpus(reserved_lwkcpus)) {
+	// 	yod_abort(-1,
+	// 	  "Could not obtain reserved LWK CPU list from plugin.");
+	// }
+	//
+	// mos_cpuset_xor(reserved_lwkcpus, set, reserved_lwkcpus);
 }
 
 /**
