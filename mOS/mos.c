@@ -379,6 +379,7 @@ static int _cpus_request_set(cpumask_var_t request, cpumask_var_t target)
 	}
 
 	if (cpumask_intersects(request, lwkcpus_reserved_map)) {
+		pr_info("Reserved LWK CPU was requested.\n");
 		rc = -EBUSY;
 		goto out;
 	}
