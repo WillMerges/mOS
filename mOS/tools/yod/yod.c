@@ -2492,7 +2492,7 @@ static void write_mempolicy_normal(unsigned char *buffer)
 	}
 }
 
-int main(int argc, char **argv)
+int yod_main(int argc, char **argv)
 {
 
 	char *verbose_env, *tst_plugin, *options, *mpi_env;
@@ -2671,6 +2671,10 @@ int main(int argc, char **argv)
 
 	fflush(stdout);
 	fflush(stderr);
+}
+
+int main(int argc, char* argv[]) {
+	yod_main(argc, argv);
 
 	execvp(argv[optind], &argv[optind]);
 
