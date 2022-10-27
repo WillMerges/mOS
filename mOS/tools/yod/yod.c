@@ -2679,8 +2679,16 @@ int main(int argc, char* argv[]) {
 
 	show_target(YOD_DEBUG, optind, argc, argv);
 
+	// TODO this is also dirty (at the moment)
+	// set the environment for all children processes to use the special fork hooks
+	if(-1 == setenv("LD_PRELOAD", "/users/wdm7973/mos-hooks.so", 1)) {
+		printf("setenv failed to set LD_PRELOAD\n");
+		return -errno;
+	}
+
 	execvp(argv[optind], &argv[optind]);
 
 	/* If we got here, something terribly wrong happened */
 	yod_abort(-1, "exec failed: %s", strerror(errno));
+
 }
