@@ -2661,6 +2661,7 @@ int yod_main(int argc, char **argv)
 	/* Set mOS view of this process to user specified or default all view */
 	set_mos_view(view);
 
+	printf("unlock\n");
 	plugin->unlock(&lock_options);
 
 	fflush(stdout);
