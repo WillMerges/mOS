@@ -2537,12 +2537,6 @@ int yod_main(int argc, char **argv)
 
 	show_state(YOD_DEBUG);
 
-	if (argc - optind < 1) {
-		yod_abort(-EINVAL, "No target specified.");
-	}
-
-	show_target(YOD_DEBUG, optind, argc, argv);
-
 	timeout_str = getenv("YOD_TIMEOUT");
 	if (timeout_str)
 		lock_options.timeout_millis = strtoul(timeout_str, 0, 0);
@@ -2677,6 +2671,12 @@ int yod_main(int argc, char **argv)
 
 int main(int argc, char* argv[]) {
 	yod_main(argc, argv);
+
+	if (argc - optind < 1) {
+		yod_abort(-EINVAL, "No target specified.");
+	}
+
+	show_target(YOD_DEBUG, optind, argc, argv);
 
 	execvp(argv[optind], &argv[optind]);
 
