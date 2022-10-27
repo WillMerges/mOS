@@ -11,7 +11,7 @@
 # more details.
 
 mos_tools_inc := $(src)/../include
-HOST_EXTRACFLAGS += -Wextra -g -I$(mos_tools_inc)
+HOST_EXTRACFLAGS += -Wextra -g -I$(mos_tools_inc) -fPIC
 
 always := $(hostprogs-y)
 

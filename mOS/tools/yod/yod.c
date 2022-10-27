@@ -2492,7 +2492,7 @@ static void write_mempolicy_normal(unsigned char *buffer)
 	}
 }
 
-int yod_main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 
 	char *verbose_env, *tst_plugin, *options, *mpi_env;
@@ -2676,8 +2676,4 @@ int yod_main(int argc, char **argv)
 
 	/* If we got here, something terribly wrong happened */
 	yod_abort(-1, "exec failed: %s", strerror(errno));
-}
-
-int main(int argc, char* argv[]) {
-	return yod_main(argc, argv);
 }
