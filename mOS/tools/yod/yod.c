@@ -2492,7 +2492,7 @@ static void write_mempolicy_normal(unsigned char *buffer)
 	}
 }
 
-int yod_main(int argc, char **argv)
+int yod_main(int argc, char **argv, unsigned char ignore_affinity, unsigned char no_exec)
 {
 
 	char *verbose_env, *tst_plugin, *options, *mpi_env;
@@ -2536,6 +2536,15 @@ int yod_main(int argc, char **argv)
 	parse_options(argc, argv);
 
 	show_state(YOD_DEBUG);
+
+	// TODO added this
+	if(!no_exec) {
+		if (argc - optind < 1) {
+			yod_abort(-EINVAL, "No target specified.");
+		}
+
+		show_target(YOD_DEBUG, optind, argc, argv);
+	}
 
 	timeout_str = getenv("YOD_TIMEOUT");
 	if (timeout_str)
@@ -2642,7 +2651,7 @@ int yod_main(int argc, char **argv)
 	YOD_LOG(YOD_DEBUG, "Setting affinity to %s",
 		mos_cpuset_to_list_validate(lwk_req.lwkcpus_request));
 
-	if (tst_plugin) {
+	if (tst_plugin || ignore_affinity) {
 		/* Many of the unit tests are designed to run outside of a
 		 * complete mOS system and may also be running in environments
 		 * that simulate other processor topologies.  Therefore we
@@ -2656,7 +2665,10 @@ int yod_main(int argc, char **argv)
 			mos_cpuset_to_list_validate(lwk_req.lwkcpus_request),
 			strerror(errno));
 		exit(-1);
-	}
+	} // TODO for processes forked from an LWK process, we should never set afffinity
+	  // for unknown reasons it's hangs on the sched_setaffinity syscall
+	  // child processes should inherit the affinity of the parent so it's probably fine to skip this
+
 
 	/* Set mOS view of this process to user specified or default all view */
 	set_mos_view(view);
@@ -2667,28 +2679,24 @@ int yod_main(int argc, char **argv)
 	fflush(stdout);
 	fflush(stderr);
 
+	// TODO added this
+	if(!no_exec) {
+		// TODO this is also dirty (at the moment)
+		// set the environment for all children processes to use the special fork hooks
+		if(-1 == setenv("LD_PRELOAD", "/users/wdm7973/mos-hooks.so", 1)) {
+			printf("setenv failed to set LD_PRELOAD\n");
+			return -errno;
+		}
+
+		execvp(argv[optind], &argv[optind]);
+
+		/* If we got here, something terribly wrong happened */
+		yod_abort(-1, "exec failed: %s", strerror(errno));
+	}
+
 	return 0;
 }
 
 int main(int argc, char* argv[]) {
-	yod_main(argc, argv);
-
-	if (argc - optind < 1) {
-		yod_abort(-EINVAL, "No target specified.");
-	}
-
-	show_target(YOD_DEBUG, optind, argc, argv);
-
-	// TODO this is also dirty (at the moment)
-	// set the environment for all children processes to use the special fork hooks
-	if(-1 == setenv("LD_PRELOAD", "/users/wdm7973/mos-hooks.so", 1)) {
-		printf("setenv failed to set LD_PRELOAD\n");
-		return -errno;
-	}
-
-	execvp(argv[optind], &argv[optind]);
-
-	/* If we got here, something terribly wrong happened */
-	yod_abort(-1, "exec failed: %s", strerror(errno));
-
+	yod_main(argc, argv, 0, 0);
 }
