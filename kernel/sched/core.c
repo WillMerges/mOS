@@ -6067,6 +6067,16 @@ long sched_setaffinity(pid_t pid, const struct cpumask *in_mask)
 	}
 #endif
 again:
+	// TODO remove
+	printk("Setting CPUs allowed for process w/ PID: %i\n", pid);
+	printk("Is MOS Process? %i\n", is_mos_process(p));
+	printk("Allowed CPUs:");
+	int cpu;
+	for_each_cpu(cpu, new_mask) {
+		printk(" %i", cpu);
+	}
+	printk("\n");
+
 	retval = __set_cpus_allowed_ptr(p, new_mask, true);
 
 	if (!retval && !is_mos_process(p)) {
