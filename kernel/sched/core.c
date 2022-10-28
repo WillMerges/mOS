@@ -6068,7 +6068,7 @@ long sched_setaffinity(pid_t pid, const struct cpumask *in_mask)
 #endif
 again:
 	// TODO remove
-	printk("Setting CPUs allowed for process w/ PID: %i\n", pid);
+	printk("Setting CPUs allowed for process w/ PID: %ld\n", (long int)pid);
 	printk("Is MOS Process? %i\n", is_mos_process(p));
 	printk("Allowed CPUs:");
 	int cpu;
@@ -6097,6 +6097,9 @@ out_free_cpus_allowed:
 	free_cpumask_var(cpus_allowed);
 out_put_task:
 	put_task_struct(p);
+
+	printk("sched_setaffinity return\n");
+
 	return retval;
 }
 
@@ -6132,6 +6135,8 @@ SYSCALL_DEFINE3(sched_setaffinity, pid_t, pid, unsigned int, len,
 	if (retval == 0)
 		retval = sched_setaffinity(pid, new_mask);
 	free_cpumask_var(new_mask);
+
+	printk("returning from sched_setaffinity system call\n");
 	return retval;
 }
 
