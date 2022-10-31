@@ -426,7 +426,7 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 		current->mos_process->yod_mm = current->mm;
 
 		/* Initialize the sequencing array based on the lwkcpus mask */
-		for_each_cpu(cpu, current->mos_process->lwkcpus) {}
+		for_each_cpu(cpu, current->mos_process->lwkcpus) {
 			*cpu_list++ = cpu;
 			printk("lwkcpus request: adding CPU %d to lwkcpus_sequence\n", cpu);
 		}
