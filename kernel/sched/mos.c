@@ -3472,6 +3472,8 @@ static void task_fork_mos(struct task_struct *p)
 			set_utility_cpus_allowed(p, thread_count, clone_hints);
 		}
 	} else {
+		// TODO THIS IS WHY ALL PROCESSES GO ON THE SAME CPU
+		// WEE WOO WEE WOO WEE WOO
 		/*
 		 * This is a fork of a full process, we will default the
 		 * scheduling policy and priority to the default Linux
@@ -3599,7 +3601,7 @@ int mos_select_cpu_candidate(struct task_struct *p, int cpu)
 }
 
 /* mOS scheduler class function table */
-const struct sched_class mos_sched_class 
+const struct sched_class mos_sched_class
 	__attribute__((section("__mos_sched_class"))) = {
 	.enqueue_task		= enqueue_task_mos,
 	.dequeue_task		= dequeue_task_mos,
@@ -3625,4 +3627,3 @@ const struct sched_class mos_sched_class
 	.update_curr		= update_curr_mos,
 	.task_fork		= task_fork_mos,
 };
-
