@@ -1963,6 +1963,8 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 		 * afterwards anyway.
 		 */
 		rq = move_queued_task(rq, &rf, p, dest_cpu);
+
+		printk("moved to new run queue\n");
 	}
 out:
 	task_rq_unlock(rq, p, &rf);
