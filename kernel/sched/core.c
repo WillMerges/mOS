@@ -1878,6 +1878,8 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 	struct rq *rq;
 	int ret = 0;
 
+	printk("__set_cpus_allowed_ptr\n");
+
 	rq = task_rq_lock(p, &rf);
 	update_rq_clock(rq);
 
