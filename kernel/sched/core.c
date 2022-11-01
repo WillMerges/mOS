@@ -1768,6 +1768,8 @@ struct migration_arg {
 static struct rq *__migrate_task(struct rq *rq, struct rq_flags *rf,
 				 struct task_struct *p, int dest_cpu)
 {
+	printk("__migrate_task\n");
+
 	if (!is_cpu_allowed(p, dest_cpu))
 		return rq;
 	update_rq_clock(rq);
@@ -1787,6 +1789,8 @@ static int migration_cpu_stop(void *data)
 	struct task_struct *p = arg->task;
 	struct rq *rq = this_rq();
 	struct rq_flags rf;
+
+	printk("migration_cpu_stop\n");
 
 	/*
 	 * The original target CPU might have gone down and we might
