@@ -395,9 +395,13 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 {
 	int rc;
 
+	printk("entered lwkcpus_reqest_set\n");
+
 	rc = _cpus_request_set(request, lwkcpus_reserved_map);
 
 	if (!rc) {
+		printk("good request set\n");
+
 		int *cpu_list, num_lwkcpus, cpu;
 
 		current->mos_process = mos_get_process();
