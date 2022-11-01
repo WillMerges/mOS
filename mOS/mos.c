@@ -395,12 +395,12 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 {
 	int rc;
 
-	printk("entered lwkcpus_reqest_set\n");
+	pr_info("entered lwkcpus_reqest_set\n");
 
 	rc = _cpus_request_set(request, lwkcpus_reserved_map);
 
 	if (!rc) {
-		printk("good request set\n");
+		pr_info("good request set\n");
 
 		int *cpu_list, num_lwkcpus, cpu;
 
@@ -432,7 +432,7 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 		/* Initialize the sequencing array based on the lwkcpus mask */
 		for_each_cpu(cpu, current->mos_process->lwkcpus) {
 			*cpu_list++ = cpu;
-			printk("lwkcpus request: adding CPU %d to lwkcpus_sequence\n", cpu);
+			pr_info("lwkcpus request: adding CPU %d to lwkcpus_sequence\n", cpu);
 		}
 
 		/* Set sentinel value */
