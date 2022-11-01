@@ -1953,9 +1953,13 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 
 	if (task_running(rq, p) || p->state == TASK_WAKING) {
 		struct migration_arg arg = { p, dest_cpu };
+		printk("need help from migration thread\n");
+
 		/* Need help from migration thread: drop lock and wait. */
 		task_rq_unlock(rq, p, &rf);
 		stop_one_cpu(cpu_of(rq), migration_cpu_stop, &arg);
+
+		printk("set cpus allowed return\n");
 		return 0;
 	} else if (task_on_rq_queued(p)) {
 		/*
@@ -1969,6 +1973,7 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 out:
 	task_rq_unlock(rq, p, &rf);
 
+	printk("set cpus allowed return\n");
 	return ret;
 }
 
