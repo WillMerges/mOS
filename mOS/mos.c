@@ -196,6 +196,8 @@ static void _mos_debug_process(struct mos_process_t *p, const char *func,
  */
 static struct mos_process_t *mos_get_process(void)
 {
+	pr_info("mos get process\n");
+
 	struct mos_process_t *process = current->mos_process;
 
 	if (!process) {
