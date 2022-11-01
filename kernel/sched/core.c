@@ -1935,11 +1935,11 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 		}
 	}
 
-	if (is_mos_process(p))
+	if (is_mos_process(p)) {
 		dest_cpu = select_next_cpu_mos(p, new_mask);
 
 		printk("new dest_cpu is %d\n", dest_cpu);
-	else {
+	} else {
 
 		/* Can the task run on the task's current CPU? */
 		if (cpumask_test_cpu(task_cpu(p), new_mask))
