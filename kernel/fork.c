@@ -2224,7 +2224,7 @@ static __latent_entropy struct task_struct *copy_process(
 
 		// TODO this is new
 		// a copy of an LWK process is an LWK process!
-		if(is_mostask())) {
+		if(is_mostask()) {
 			p->mos_flags = current->mos_flags;
 			p->mos_process = mos_copy_process(current->mos_process);
 
