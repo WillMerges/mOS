@@ -1951,6 +1951,9 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 	}
 
 	if (is_mos_process(p)) {
+		// TODO we should select a dest_cpu by looking at the least loaded CPU
+		// this ends up placing all of our processes on the first CPU in the sequence list
+		// alternatively, we can do this in userspace and change the lwk sequence
 		dest_cpu = select_next_cpu_mos(p, new_mask);
 
 		printk("new dest_cpu is %d\n", dest_cpu);

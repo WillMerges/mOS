@@ -48,11 +48,17 @@ struct cpu_stop_work {
 
 static inline int stop_one_cpu(unsigned int cpu, cpu_stop_fn_t fn, void *arg)
 {
+	printk("stop_on_cpu\n");
+
 	int ret = -ENOENT;
 	preempt_disable();
 	if (cpu == smp_processor_id())
 		ret = fn(arg);
+
+	printk("stop_on_cpu fn exit\n");
 	preempt_enable();
+
+	printk("stop_one_cpu exit\n");
 	return ret;
 }
 
