@@ -459,12 +459,11 @@ static int _cpus_request_set(cpumask_var_t request, cpumask_var_t target)
 		goto out;
 	}
 
-	// TODO we no longer check if the cpumask intersects
-	// if (cpumask_intersects(request, lwkcpus_reserved_map)) {
-	// 	pr_info("Reserved LWK CPU was requested.\n");
-	// 	rc = -EBUSY;
-	// 	goto out;
-	// }
+	if (cpumask_intersects(request, lwkcpus_reserved_map)) {
+		pr_info("Reserved LWK CPU was requested.\n");
+		rc = -EBUSY;
+		goto out;
+	}
 
 	cpumask_or(target, target, request);
 out:
@@ -475,9 +474,11 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 {
 	int rc;
 
-	rc = _cpus_request_set(request, lwkcpus_reserved_map);
-
-	if (!rc) {
+	// rc = _cpus_request_set(request, lwkcpus_reserved_map);
+	if (!cpumask_subset(request, lwkcpus_map)) {
+		pr_info("Non-LWK CPU was requested.\n");
+		rc = -EINVAL;
+	} else {
 		int *cpu_list, num_lwkcpus, cpu;
 
 		current->mos_process = mos_get_process();
