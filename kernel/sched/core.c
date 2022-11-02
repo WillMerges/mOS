@@ -1969,11 +1969,20 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 
 	if (task_running(rq, p) || p->state == TASK_WAKING) {
 		struct migration_arg arg = { p, dest_cpu };
-		printk("need help from migration thread or do directly (if mOS)\n");
+		printk("need help from migration thread\n");
 
-		/* Need help from migration thread: drop lock and wait. */
-		task_rq_unlock(rq, p, &rf);
-		stop_one_cpu(cpu_of(rq), migration_cpu_stop, &arg);
+		// TODO I added, probably doesn't work
+		// for some reason the migration thread does not do the work for us
+		// when using a forked mOS task, so instead we just do the work right now
+		if(is_mos_process(p)) {
+			task_rq_unlock(rq, p, &rf);
+			stop_one_cpu_nowait(cpu_of(rq), migration_cpu_stop, &arg);
+		} else {
+			/* Need help from migration thread: drop lock and wait. */
+			task_rq_unlock(rq, p, &rf);
+			stop_one_cpu(cpu_of(rq), migration_cpu_stop, &arg);
+		}
+
 
 		printk("set cpus allowed return\n");
 		return 0;
