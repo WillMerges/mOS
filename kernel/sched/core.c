@@ -1972,6 +1972,8 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 		printk("need help from migration thread or do directly (if mOS)\n");
 
 		// TODO I added, probably doesn't work
+		// for some reason the migration thread does not do the work for us
+		// when using a forked mOS task, so instead we just do the work right now
 		if(is_mos_process(p)) {
 			preempt_disable();
 			migration_cpu_stop(&arg);
