@@ -1735,6 +1735,8 @@ static inline bool is_cpu_allowed(struct task_struct *p, int cpu)
 static struct rq *move_queued_task(struct rq *rq, struct rq_flags *rf,
 				   struct task_struct *p, int new_cpu)
 {
+	printk("moved_queued_task\n");
+
 	lockdep_assert_held(&rq->lock);
 
 	deactivate_task(rq, p, DEQUEUE_NOCLOCK);
@@ -1747,6 +1749,8 @@ static struct rq *move_queued_task(struct rq *rq, struct rq_flags *rf,
 	BUG_ON(task_cpu(p) != new_cpu);
 	activate_task(rq, p, 0);
 	check_preempt_curr(rq, p, 0);
+
+	printk("moved_quued_task exit\n");
 
 	return rq;
 }
