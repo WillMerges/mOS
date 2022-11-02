@@ -295,7 +295,7 @@ struct mos_process_t *mos_copy_process(struct mos_process_t* p)
 	cpumask_copy(process->utilcpus, p->utilcpus);
 
 	// set up the CPU sequence array
-	cpu_list = vmalloc(sizeof(int)*(num_lwkcpus+1));
+	cpu_list = vmalloc(sizeof(int)*((process->num_lwkcpus)+1));
 	if (!cpu_list) {
 		goto bad_cpu_list_alloc;
 	}
