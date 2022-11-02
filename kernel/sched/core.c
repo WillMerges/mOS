@@ -1779,6 +1779,8 @@ static struct rq *__migrate_task(struct rq *rq, struct rq_flags *rf,
 	update_rq_clock(rq);
 	rq = move_queued_task(rq, rf, p, dest_cpu);
 
+	printk("__migrate_task exit\n");
+
 	return rq;
 }
 
@@ -1825,6 +1827,9 @@ static int migration_cpu_stop(void *data)
 	raw_spin_unlock(&p->pi_lock);
 
 	local_irq_enable();
+
+	printk("migration_cpu_stop exit\n");
+
 	return 0;
 }
 
