@@ -244,7 +244,7 @@ static struct mos_process_t *mos_get_process(void)
  /**
   * Copy an mOS process, creating a new one
   */
-static struct mos_process_t *mos_copy_process(mos_process_t* p)
+static struct mos_process_t *mos_copy_process(struct mos_process_t* p)
 {
 	struct mos_process_callbacks_elem_t *elem;
 	int* cpu_list;

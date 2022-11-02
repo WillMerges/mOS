@@ -208,6 +208,8 @@ struct mos_process_callbacks_t {
 	void (*mos_process_exit)(struct mos_process_t *);
 };
 
+extern struct mos_process_t *mos_copy_process(struct mos_process_t* p);
+
 extern int mos_register_process_callbacks(struct mos_process_callbacks_t *);
 extern int mos_unregister_process_callbacks(struct mos_process_callbacks_t *);
 
