@@ -249,6 +249,7 @@ struct mos_process_t *mos_copy_process(struct mos_process_t* p)
 	struct mos_process_t* process;
 	struct mos_process_callbacks_elem_t *elem;
 	int* cpu_list;
+	int cpu;
 
 	process = vmalloc(sizeof(struct mos_process_t));
 	if (!process)
