@@ -196,8 +196,6 @@ static void _mos_debug_process(struct mos_process_t *p, const char *func,
  */
 static struct mos_process_t *mos_get_process(void)
 {
-	pr_info("mos get process\n");
-
 	struct mos_process_t *process = current->mos_process;
 
 	if (!process) {
@@ -240,7 +238,6 @@ static struct mos_process_t *mos_get_process(void)
 	return process;
 }
 
-// TODO I added this, so it's sus
  /**
   * Copy an mOS process, creating a new one
   */
@@ -478,13 +475,9 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 {
 	int rc;
 
-	pr_info("entered lwkcpus_reqest_set\n");
-
 	rc = _cpus_request_set(request, lwkcpus_reserved_map);
 
 	if (!rc) {
-		pr_info("good request set\n");
-
 		int *cpu_list, num_lwkcpus, cpu;
 
 		current->mos_process = mos_get_process();
@@ -513,10 +506,8 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 		current->mos_process->yod_mm = current->mm;
 
 		/* Initialize the sequencing array based on the lwkcpus mask */
-		for_each_cpu(cpu, current->mos_process->lwkcpus) {
+		for_each_cpu(cpu, current->mos_process->lwkcpus)
 			*cpu_list++ = cpu;
-			pr_info("lwkcpus request: adding CPU %d to lwkcpus_sequence\n", cpu);
-		}
 
 		/* Set sentinel value */
 		*cpu_list = -1;

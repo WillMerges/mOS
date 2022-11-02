@@ -1735,8 +1735,6 @@ static inline bool is_cpu_allowed(struct task_struct *p, int cpu)
 static struct rq *move_queued_task(struct rq *rq, struct rq_flags *rf,
 				   struct task_struct *p, int new_cpu)
 {
-	printk("moved_queued_task\n");
-
 	lockdep_assert_held(&rq->lock);
 
 	deactivate_task(rq, p, DEQUEUE_NOCLOCK);
@@ -1749,8 +1747,6 @@ static struct rq *move_queued_task(struct rq *rq, struct rq_flags *rf,
 	BUG_ON(task_cpu(p) != new_cpu);
 	activate_task(rq, p, 0);
 	check_preempt_curr(rq, p, 0);
-
-	printk("moved_quued_task exit\n");
 
 	return rq;
 }
@@ -1772,14 +1768,10 @@ struct migration_arg {
 static struct rq *__migrate_task(struct rq *rq, struct rq_flags *rf,
 				 struct task_struct *p, int dest_cpu)
 {
-	printk("__migrate_task\n");
-
 	if (!is_cpu_allowed(p, dest_cpu))
 		return rq;
 	update_rq_clock(rq);
 	rq = move_queued_task(rq, rf, p, dest_cpu);
-
-	printk("__migrate_task exit\n");
 
 	return rq;
 }
@@ -1795,8 +1787,6 @@ static int migration_cpu_stop(void *data)
 	struct task_struct *p = arg->task;
 	struct rq *rq = this_rq();
 	struct rq_flags rf;
-
-	printk("migration_cpu_stop\n");
 
 	/*
 	 * The original target CPU might have gone down and we might
@@ -1827,8 +1817,6 @@ static int migration_cpu_stop(void *data)
 	raw_spin_unlock(&p->pi_lock);
 
 	local_irq_enable();
-
-	printk("migration_cpu_stop exit\n");
 
 	return 0;
 }
@@ -1891,8 +1879,6 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 	struct rq *rq;
 	int ret = 0;
 
-	printk("__set_cpus_allowed_ptr\n");
-
 	rq = task_rq_lock(p, &rf);
 	update_rq_clock(rq);
 
@@ -1951,12 +1937,10 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 	}
 
 	if (is_mos_process(p)) {
-		// TODO we should select a dest_cpu by looking at the least loaded CPU
+		// TODO we could select a dest_cpu by looking at the least loaded CPU
 		// this ends up placing all of our processes on the first CPU in the sequence list
 		// alternatively, we can do this in userspace and change the lwk sequence
 		dest_cpu = select_next_cpu_mos(p, new_mask);
-
-		printk("new dest_cpu is %d\n", dest_cpu);
 	} else {
 
 		/* Can the task run on the task's current CPU? */
@@ -1969,13 +1953,11 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 
 	if (task_running(rq, p) || p->state == TASK_WAKING) {
 		struct migration_arg arg = { p, dest_cpu };
-		printk("need help from migration thread\n");
 
 		/* Need help from migration thread: drop lock and wait. */
 		task_rq_unlock(rq, p, &rf);
 		stop_one_cpu(cpu_of(rq), migration_cpu_stop, &arg);
 
-		printk("set cpus allowed return\n");
 		return 0;
 	} else if (task_on_rq_queued(p)) {
 		/*
@@ -1983,13 +1965,10 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 		 * afterwards anyway.
 		 */
 		rq = move_queued_task(rq, &rf, p, dest_cpu);
-
-		printk("moved to new run queue\n");
 	}
 out:
 	task_rq_unlock(rq, p, &rf);
 
-	printk("set cpus allowed return\n");
 	return ret;
 }
 
@@ -6094,16 +6073,6 @@ long sched_setaffinity(pid_t pid, const struct cpumask *in_mask)
 	}
 #endif
 again:
-	// TODO remove
-	printk("Setting CPUs allowed for process w/ PID: %ld\n", (long int)pid);
-	printk("Is MOS Process? %i\n", is_mos_process(p));
-	printk("Allowed CPUs:");
-	int cpu;
-	for_each_cpu(cpu, new_mask) {
-		printk(" %i", cpu);
-	}
-	printk("\n");
-
 	retval = __set_cpus_allowed_ptr(p, new_mask, true);
 
 	if (!retval && !is_mos_process(p)) {
@@ -6124,8 +6093,6 @@ out_free_cpus_allowed:
 	free_cpumask_var(cpus_allowed);
 out_put_task:
 	put_task_struct(p);
-
-	printk("sched_setaffinity return\n");
 
 	return retval;
 }
@@ -6163,7 +6130,6 @@ SYSCALL_DEFINE3(sched_setaffinity, pid_t, pid, unsigned int, len,
 		retval = sched_setaffinity(pid, new_mask);
 	free_cpumask_var(new_mask);
 
-	printk("returning from sched_setaffinity system call\n");
 	return retval;
 }
 

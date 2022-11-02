@@ -125,8 +125,6 @@ int stop_one_cpu(unsigned int cpu, cpu_stop_fn_t fn, void *arg)
 	struct cpu_stop_done done;
 	struct cpu_stop_work work = { .fn = fn, .arg = arg, .done = &done };
 
-	printk("stop_one_cpu start\n");
-
 	cpu_stop_init_done(&done, 1);
 	if (!cpu_stop_queue_work(cpu, &work))
 		return -ENOENT;
@@ -136,8 +134,6 @@ int stop_one_cpu(unsigned int cpu, cpu_stop_fn_t fn, void *arg)
 	 */
 	cond_resched();
 	wait_for_completion(&done.completion);
-
-	printk("stop_one_cpu stop\n");
 
 	return done.ret;
 }
