@@ -3444,7 +3444,8 @@ static void task_fork_mos(struct task_struct *p)
 	 * we will set the cpus_allowed mask to the original Linux mask that
 	 * this process had when it existed in the Linux world.
 	 */
-	if (p->mos.clone_flags & CLONE_THREAD) {
+	 // TODO I changed this to always execute
+	if (p->mos.clone_flags & CLONE_THREAD || 1) {
 		int thread_count =
 			atomic_inc_return(&proc->threads_created);
 
@@ -3472,8 +3473,6 @@ static void task_fork_mos(struct task_struct *p)
 			set_utility_cpus_allowed(p, thread_count, clone_hints);
 		}
 	} else {
-		// TODO THIS IS WHY ALL PROCESSES GO ON THE SAME CPU
-		// WEE WOO WEE WOO WEE WOO
 		/*
 		 * This is a fork of a full process, we will default the
 		 * scheduling policy and priority to the default Linux

@@ -2205,8 +2205,8 @@ static __latent_entropy struct task_struct *copy_process(
 			atomic_inc(&current->mos_process->alive);
 	} else {
 		/* A copy of an LWK process is not an LWK process. */
-		p->mos_flags = current->mos_flags & ~MOS_IS_LWK_PROCESS;
-		p->mos_process = NULL;
+		// p->mos_flags = current->mos_flags & ~MOS_IS_LWK_PROCESS;
+		// p->mos_process = NULL;
 
 		/* All Linux processes inherit the mOS view from its parent.
 		 * The child process can override its view later by writing to
@@ -2219,8 +2219,18 @@ static __latent_entropy struct task_struct *copy_process(
 		 *
 		 * No need to lock child process since it is not yet active.
 		 */
-		if (is_mostask())
-			SET_MOS_VIEW(p, MOS_VIEW_DEFAULT);
+		// if (is_mostask())
+		// 	SET_MOS_VIEW(p, MOS_VIEW_DEFAULT);
+
+		// TODO this is new
+		// a copy of an LWK process is an LWK process!
+		p->mos_flags = current->mos_flags;
+		p->mos_process = mos_copy_process(current->mos_process);
+
+		if(!p->mos_process) {
+			retval = -ENOMEM;
+			goto bad_fork_put_pidfd;
+		}
 	}
 #endif
 

@@ -240,6 +240,85 @@ static struct mos_process_t *mos_get_process(void)
 	return process;
 }
 
+// TODO I added this, so it's sus
+ /**
+  * Copy an mOS process, creating a new one
+  */
+static struct mos_process_t *mos_copy_process(mos_process_t* p)
+{
+	struct mos_process_callbacks_elem_t *elem;
+	int* cpu_list;
+
+	process = vmalloc(sizeof(struct mos_process_t));
+	if (!process)
+		return 0;
+
+	process->tgid = current->tgid;
+
+	if (!zalloc_cpumask_var(&process->lwkcpus, GFP_KERNEL)) {
+		mos_ras(MOS_LWK_PROCESS_ERROR_UNSTABLE_NODE,
+			"CPU mask allocation failure.");
+		goto bad_lwkcpus_alloc;
+	}
+
+	if(!zalloc_cpumask_var(&process->utilcpus, GFP_KERNEL)) {
+		mos_ras(MOS_LWK_PROCESS_ERROR_UNSTABLE_NODE,
+			"CPU mask allocation failure.");
+		goto bad_utilcpus_alloc;
+	}
+
+	/* Mark current process as mOS LWK process. */
+	current->mos_flags |= MOS_IS_LWK_PROCESS;
+
+	atomic_set(&process->alive, 1); /* count the current thread */
+
+	list_for_each_entry(elem, &mos_process_callbacks, list) {
+		if (elem->callbacks->mos_process_init &&
+			elem->callbacks->mos_process_init(process)) {
+			mos_ras(MOS_LWK_PROCESS_ERROR,
+				"Non-zero return code from LWK process initialization callback %pf.",
+				elem->callbacks->mos_process_init);
+
+			goto bad_callbacks;
+		}
+	}
+
+	// at this point we have a fresh mOS process
+
+	process->num_lwkcpus = p->num_lwkcpus;
+	process->num_util_threads = p->num_util_threads;
+	process->yod_mm = p->yod_mm;
+
+	// copy the cpu masks to the new process
+	cpumask_copy(process->lwkcpus, p->lwkcpus);
+	cpumask_copy(process->utilcpus, p->utilcpus);
+
+	// set up the CPU sequence array
+	cpu_list = vmalloc(sizeof(int)*(num_lwkcpus+1));
+	if (!cpu_list) {
+		goto bad_cpu_list_alloc;
+	}
+
+	process->lwkcpus_sequence = cpu_list;
+	for_each_cpu(cpu, process->lwkcpus) {
+		*cpu_list++ = cpu;
+		pr_info("lwkcpus request: adding CPU %d to lwkcpus_sequence\n", cpu);
+	}
+
+	*cpu_list = -1;
+
+	return process;
+
+bad_cpu_list_alloc:
+bad_callbacks:
+	free_cpumask_var(process->utilcpus);
+bad_utilcpus_alloc:
+	free_cpumask_var(process->lwkcpus);
+bad_lwkcpus_alloc:
+
+	return 0;
+}
+
 void mos_exit_thread(void)
 {
 	struct mos_process_t *process;
