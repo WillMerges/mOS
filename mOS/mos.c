@@ -472,7 +472,7 @@ out:
 
 static int _lwkcpus_request_set(cpumask_var_t request)
 {
-	int rc;
+	int rc = 0;
 
 	// rc = _cpus_request_set(request, lwkcpus_reserved_map);
 	if (!cpumask_subset(request, lwkcpus_map)) {
