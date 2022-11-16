@@ -2215,6 +2215,16 @@ static __latent_entropy struct task_struct *copy_process(
 				retval = -ENOMEM;
 				goto bad_fork_put_pidfd;
 			}
+
+			// copy the LWK mm
+			// NOTE: this is a pointer copy!
+			// TODO I added this
+			p->lwk_mm = current->lwk_mm;
+
+			if(current->lwk_mm) {
+				// increment the ref count
+				atomic_inc(&(current->lwk_mm.refcount));
+			}
 		} else {
 			// this is just a Linux process
 

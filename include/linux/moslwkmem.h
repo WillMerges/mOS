@@ -762,6 +762,10 @@ struct lwk_mm {
 	enum lwk_pma_type pma_type;/* Physical memory allocator type chosen  */
 	unsigned long report_level;/* Enable record/reporting of debug counts*/
 	long brk_clear_len;	   /* Heap length to clear when it expands   */
+
+	/* Reference counter */
+	// TODO I added
+	atomic_t refcount;
 };
 
 extern struct lwk_mm *curr_lwk_mm(void);
