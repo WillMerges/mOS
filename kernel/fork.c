@@ -2223,7 +2223,7 @@ static __latent_entropy struct task_struct *copy_process(
 
 			if(current->mos_process->lwk_mm) {
 				// increment the ref count
-				atomic_inc(&(current->mos_process->lwk_mm.refcount));
+				atomic_inc(&(current->mos_process->lwk_mm->refcount));
 			}
 		} else {
 			// this is just a Linux process
