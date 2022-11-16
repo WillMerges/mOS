@@ -2219,7 +2219,7 @@ static __latent_entropy struct task_struct *copy_process(
 			// copy the LWK mm
 			// NOTE: this is a pointer copy!
 			// TODO I added this
-			p->lwk_mm = current->lwk_mm;
+			p->mos_process->lwk_mm = current->mos_process->lwk_mm;
 
 			if(current->lwk_mm) {
 				// increment the ref count
