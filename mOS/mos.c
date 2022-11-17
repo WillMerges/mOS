@@ -301,7 +301,6 @@ struct mos_process_t *mos_copy_process(struct mos_process_t* p)
 	process->lwkcpus_sequence = cpu_list;
 	for_each_cpu(cpu, process->lwkcpus) {
 		*cpu_list++ = cpu;
-		pr_info("lwkcpus request: adding CPU %d to lwkcpus_sequence\n", cpu);
 	}
 
 	*cpu_list = -1;
