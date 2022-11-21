@@ -233,6 +233,14 @@ static struct mos_process_t *mos_get_process(void)
 			}
 		}
 
+		// TODO I added
+		process->resource_group_count = vmalloc(sizeof(atomic_t), GFP_KERNEL);
+		if(!process->resource_group_count) {
+			mos_ras(MOS_LWK_PROCESS_ERROR_UNSTABLE_NODE,
+				"Resource group counter allocation failuren");
+			return 0;
+		}
+
 	}
 
 	return process;
@@ -305,6 +313,9 @@ struct mos_process_t *mos_copy_process(struct mos_process_t* p)
 
 	*cpu_list = -1;
 
+	process->resource_group_count = p->resource_group_count;
+	atomic_inc(process->resource_group_count);
+
 	return process;
 
 bad_cpu_list_alloc:
@@ -353,9 +364,14 @@ void mos_exit_thread(void)
 
 	/* Release the resources reserved by this process. */
 
-	// TODO have a new way to release
-	// cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
-	// 	    process->lwkcpus);
+	// TODO I added this
+	// if the last process in this resource group is dead, free the allocated CPUs
+	if(!atomic_dec_return(process->resource_group_count))) {
+		cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
+			process->lwkcpus);
+
+		vfree(&(process->resource_group_count));
+	}
 
 	/* Free process resources. */
 	free_cpumask_var(process->lwkcpus);
@@ -521,12 +537,11 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 	}
 
  out:
- 	// TODO we longer reserve CPUs so no need to clear them
-	// if (rc) {
-	// 	/* In case of error clear the CPUs that we marked reserved */
-	// 	cpumask_andnot(lwkcpus_reserved_map,
-	// 		       lwkcpus_reserved_map, request);
-	// }
+	if (rc) {
+		/* In case of error clear the CPUs that we marked reserved */
+		cpumask_andnot(lwkcpus_reserved_map,
+			       lwkcpus_reserved_map, request);
+	}
 	return rc;
 }
 

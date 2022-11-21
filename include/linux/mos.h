@@ -97,6 +97,7 @@ extern void get_mos_view_cpumask(struct cpumask *dst,
 extern ssize_t cpumap_print_mos_view_cpumask(bool list,
 			char *buf, const struct cpumask *mask);
 
+
 struct mos_process_t {
 	struct list_head list;
 	pid_t tgid;
@@ -115,6 +116,9 @@ struct mos_process_t {
 
 	/* Number of utility threads */
 	int num_util_threads;
+
+	/* number of processes sharing same resources */
+	atomic_t* resource_group_count;
 
 #ifdef CONFIG_MOS_LWKMEM
 	/* Memory attributes go here */
