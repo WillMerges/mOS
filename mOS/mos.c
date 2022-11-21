@@ -234,7 +234,7 @@ static struct mos_process_t *mos_get_process(void)
 		}
 
 		// TODO I added
-		process->resource_group_count = vmalloc(sizeof(atomic_t), GFP_KERNEL);
+		process->resource_group_count = vmalloc(sizeof(atomic_t));
 		if(!process->resource_group_count) {
 			mos_ras(MOS_LWK_PROCESS_ERROR_UNSTABLE_NODE,
 				"Resource group counter allocation failuren");
