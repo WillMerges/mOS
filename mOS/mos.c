@@ -241,6 +241,7 @@ static struct mos_process_t *mos_get_process(void)
 			return 0;
 		}
 
+		atomic_set(process->resource_group_count, 1);
 	}
 
 	return process;
