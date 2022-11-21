@@ -367,6 +367,7 @@ void mos_exit_thread(void)
 
 	// TODO I added this
 	// if the last process in this resource group is dead, free the allocated CPUs
+	prinfo("resource group count %i\n", atomic_read(process->resource_group_count));
 	if(!atomic_dec_return(process->resource_group_count)) {
 		cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
 			process->lwkcpus);
