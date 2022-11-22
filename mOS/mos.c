@@ -372,7 +372,7 @@ void mos_exit_thread(void)
 		cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
 			process->lwkcpus);
 
-		vfree(&(process->resource_group_count));
+		vfree(process->resource_group_count);
 	}
 
 	/* Free process resources. */
