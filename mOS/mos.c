@@ -346,6 +346,22 @@ void mos_exit_thread(void)
 	}
 
 	_mos_debug_process(process, __func__, __LINE__);
+	
+	/* Release the resources reserved by this process. */
+    
+    // TODO I added this
+	// if the last process in this resource group is dead, free the allocated CPUs
+	// TODO we can guarantee there's no race condition here
+	// a process being in the 'clone' syscall means it cannot be in this exit routine
+	// pr_info("resource group count %i\n", atomic_read(process->resource_group_count));
+	if(!atomic_dec_return(process->resource_group_count)) {
+		pr_info("freeing lwkcpus\n");
+
+		cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
+			process->lwkcpus);
+
+		vfree(process->resource_group_count);
+	}
 
 	list_for_each_entry(elem, &mos_process_callbacks, list) {
 		if (elem->callbacks->mos_thread_exit)
@@ -361,22 +377,6 @@ void mos_exit_thread(void)
 	list_for_each_entry(elem, &mos_process_callbacks, list) {
 		if (elem->callbacks->mos_process_exit)
 			elem->callbacks->mos_process_exit(process);
-	}
-
-	/* Release the resources reserved by this process. */
-
-	// TODO I added this
-	// if the last process in this resource group is dead, free the allocated CPUs
-	// TODO we can guarantee there's no race condition here
-	// a process being in the 'clone' syscall means it cannot be in this exit routine
-	// pr_info("resource group count %i\n", atomic_read(process->resource_group_count));
-	if(!atomic_dec_return(process->resource_group_count)) {
-		// pr_info("freeing lwkcpus\n");
-
-		cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
-			process->lwkcpus);
-
-		vfree(process->resource_group_count);
 	}
 
 	/* Free process resources. */
