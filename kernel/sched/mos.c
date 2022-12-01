@@ -3235,8 +3235,6 @@ select_task_rq_mos(struct task_struct *p, int cpu, int sd_flag, int flags)
 	int result;
 	int ncpu = cpu;
 
-	pr_info("select task rq mos\n");
-
 	if (unlikely(!p->mos_process))
 		return cpu;
 

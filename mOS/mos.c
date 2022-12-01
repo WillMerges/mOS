@@ -367,9 +367,11 @@ void mos_exit_thread(void)
 
 	// TODO I added this
 	// if the last process in this resource group is dead, free the allocated CPUs
-	pr_info("resource group count %i\n", atomic_read(process->resource_group_count));
+	// TODO we can guarantee there's no race condition here
+	// a process being in the 'clone' syscall means it cannot be in this exit routine
+	// pr_info("resource group count %i\n", atomic_read(process->resource_group_count));
 	if(!atomic_dec_return(process->resource_group_count)) {
-		pr_info("freeing lwkcpus\n");
+		// pr_info("freeing lwkcpus\n");
 
 		cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
 			process->lwkcpus);
