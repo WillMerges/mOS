@@ -329,6 +329,8 @@ bad_lwkcpus_alloc:
 	return 0;
 }
 
+ssize_t show_cpu_list(cpumask_var_t cpus, char *buff);
+
 void mos_exit_thread(void)
 {
 	struct mos_process_t *process;
