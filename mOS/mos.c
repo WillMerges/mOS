@@ -346,9 +346,9 @@ void mos_exit_thread(void)
 	}
 
 	_mos_debug_process(process, __func__, __LINE__);
-	
+
 	/* Release the resources reserved by this process. */
-    
+
     // TODO I added this
 	// if the last process in this resource group is dead, free the allocated CPUs
 	// TODO we can guarantee there's no race condition here
@@ -356,6 +356,13 @@ void mos_exit_thread(void)
 	// pr_info("resource group count %i\n", atomic_read(process->resource_group_count));
 	if(!atomic_dec_return(process->resource_group_count)) {
 		pr_info("freeing lwkcpus\n");
+
+		char buff[256];
+		show_cpu_list(lwkcpus_reserved_map, buff);
+		pr_info("reserved: %s\n", buff);
+
+		show_cpu_list(process->lwkcpus, buff);
+		pr_info("process: %s\n", buff);
 
 		cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
 			process->lwkcpus);
