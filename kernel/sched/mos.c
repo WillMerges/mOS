@@ -3439,52 +3439,35 @@ static void task_fork_mos(struct task_struct *p)
 	 * We need to set the cpus allowed mask appropriately. If this is
 	 * a normal thread creation, we use the cpus_allowed mask provided to
 	 * this lwk process. If this is a utility thread, we set a cpus_allowed
-	 * mask to the utility thread that we assign. If this is a
-	 * fork of a full process (not a thread within our thread group) then
-	 * we will set the cpus_allowed mask to the original Linux mask that
-	 * this process had when it existed in the Linux world.
+	 * mask to the utility thread that we assign.
 	 */
-	if (p->mos.clone_flags & CLONE_THREAD) {
-		int thread_count =
-			atomic_inc_return(&proc->threads_created);
+	int thread_count =
+		atomic_inc_return(&proc->threads_created);
+
+	/*
+	 * If the clone hints are telling us this is supposed to
+	 * be a utility thread, or if the YOD option to heuristically
+	 * assign utility threads is set, then go select an appropriate
+	 * CPU for the thread.
+	 */
+	if (likely((thread_count > proc->num_util_threads) &&
+		   !(clone_hints->flags & MOS_CLONE_ATTR_UTIL))) {
+		/*
+		 *  We are placing a thread within our LWK process. Set
+		 *  up the appropriate cpus_allowed mask
+		 */
+		set_cpus_allowed_mos(p, proc->lwkcpus);
 
 		/*
-		 * If the clone hints are telling us this is supposed to
-		 * be a utility thread, or if the YOD option to heuristically
-		 * assign utility threads is set, then go select an appropriate
-		 * CPU for the thread.
+		 * If needed, make room for this worker thread so that
+		 * it can run alone on an LWK CPU.
 		 */
-		if (likely((thread_count > proc->num_util_threads) &&
-			   !(clone_hints->flags & MOS_CLONE_ATTR_UTIL))) {
-			/*
-			 *  We are placing a thread within our LWK process. Set
-			 *  up the appropriate cpus_allowed mask
-			 */
-			set_cpus_allowed_mos(p, proc->lwkcpus);
+		push_utility_threads(p);
 
-			/*
-			 * If needed, make room for this worker thread so that
-			 * it can run alone on an LWK CPU.
-			 */
-			push_utility_threads(p);
-
-		} else {
-			set_utility_cpus_allowed(p, thread_count, clone_hints);
-		}
 	} else {
-		/*
-		 * This is a fork of a full process, we will default the
-		 * scheduling policy and priority to the default Linux
-		 * values.
-		 */
-		move_to_linux_scheduler(p, 0);
-
-		/*
-		 * We set cpus_allowed mask to be the original mask prior to
-		 * running on the LWK CPUs.
-		 */
-		set_cpus_allowed_mos(p, proc->original_cpus_allowed);
+		set_utility_cpus_allowed(p, thread_count, clone_hints);
 	}
+
 	/* Cleanup the clone hints */
 	clear_clone_hints(p);
 }

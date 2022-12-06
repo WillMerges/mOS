@@ -233,10 +233,102 @@ static struct mos_process_t *mos_get_process(void)
 			}
 		}
 
+        /* Allocate atomic reference counter for resource group */
+		process->resource_group_count = vmalloc(sizeof(atomic_t));
+		if(!process->resource_group_count) {
+			mos_ras(MOS_LWK_PROCESS_ERROR_UNSTABLE_NODE,
+				"Resource group counter allocation failure.");
+			return 0;
+		}
+
+		atomic_set(process->resource_group_count, 1);
 	}
 
 	return process;
 }
+
+ /**
+  * Copy an mOS process, creating a new one
+  */
+struct mos_process_t *mos_copy_process(struct mos_process_t* p)
+{
+	struct mos_process_t* process;
+	struct mos_process_callbacks_elem_t *elem;
+	int* cpu_list;
+	int cpu;
+
+	process = vmalloc(sizeof(struct mos_process_t));
+	if (!process)
+		return 0;
+
+	process->tgid = current->tgid;
+
+	if (!zalloc_cpumask_var(&process->lwkcpus, GFP_KERNEL)) {
+		mos_ras(MOS_LWK_PROCESS_ERROR_UNSTABLE_NODE,
+			"CPU mask allocation failure.");
+		goto bad_lwkcpus_alloc;
+	}
+
+	if(!zalloc_cpumask_var(&process->utilcpus, GFP_KERNEL)) {
+		mos_ras(MOS_LWK_PROCESS_ERROR_UNSTABLE_NODE,
+			"CPU mask allocation failure.");
+		goto bad_utilcpus_alloc;
+	}
+
+	/* Mark current process as mOS LWK process. */
+	current->mos_flags |= MOS_IS_LWK_PROCESS;
+
+	atomic_set(&process->alive, 1); /* count the current thread */
+
+	list_for_each_entry(elem, &mos_process_callbacks, list) {
+		if (elem->callbacks->mos_process_init &&
+			elem->callbacks->mos_process_init(process)) {
+			mos_ras(MOS_LWK_PROCESS_ERROR,
+				"Non-zero return code from LWK process initialization callback %pf.",
+				elem->callbacks->mos_process_init);
+
+			goto bad_callbacks;
+		}
+	}
+
+	/* at this point we have a fresh mOS process to copy to */
+	process->num_lwkcpus = p->num_lwkcpus;
+	process->num_util_threads = p->num_util_threads;
+	process->yod_mm = p->yod_mm;
+
+	/* copy the cpu masks to the new process */
+	cpumask_copy(process->lwkcpus, p->lwkcpus);
+	cpumask_copy(process->utilcpus, p->utilcpus);
+
+	/* set up the CPU sequence array */
+	cpu_list = vmalloc(sizeof(int)*((process->num_lwkcpus)+1));
+	if (!cpu_list) {
+		goto bad_cpu_list_alloc;
+	}
+
+	process->lwkcpus_sequence = cpu_list;
+	for_each_cpu(cpu, process->lwkcpus) {
+		*cpu_list++ = cpu;
+	}
+
+	*cpu_list = -1;
+
+	process->resource_group_count = p->resource_group_count;
+	atomic_inc(process->resource_group_count);
+
+	return process;
+
+bad_cpu_list_alloc:
+bad_callbacks:
+	free_cpumask_var(process->utilcpus);
+bad_utilcpus_alloc:
+	free_cpumask_var(process->lwkcpus);
+bad_lwkcpus_alloc:
+
+	return 0;
+}
+
+static ssize_t show_cpu_list(cpumask_var_t cpus, char *buff);
 
 void mos_exit_thread(void)
 {
@@ -256,6 +348,8 @@ void mos_exit_thread(void)
 
 	_mos_debug_process(process, __func__, __LINE__);
 
+	/* Release the resources reserved by this process. */
+
 	list_for_each_entry(elem, &mos_process_callbacks, list) {
 		if (elem->callbacks->mos_thread_exit)
 			elem->callbacks->mos_thread_exit(process);
@@ -272,10 +366,15 @@ void mos_exit_thread(void)
 			elem->callbacks->mos_process_exit(process);
 	}
 
-	/* Release the resources reserved by this process. */
+	// If the last process in this resource group is exiting, free the allocated CPUs
+	// A process being in the 'clone' syscall means it cannot be in this exit routine,
+    // so there is no race condition here
+	if(!atomic_dec_return(process->resource_group_count)) {
+		cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
+			process->lwkcpus);
 
-	cpumask_xor(lwkcpus_reserved_map, lwkcpus_reserved_map,
-		    process->lwkcpus);
+		vfree(process->resource_group_count);
+	}
 
 	/* Free process resources. */
 	free_cpumask_var(process->lwkcpus);
@@ -394,7 +493,7 @@ static int _lwkcpus_request_set(cpumask_var_t request)
 
 	rc = _cpus_request_set(request, lwkcpus_reserved_map);
 
-	if (!rc) {
+    if (!rc) {
 		int *cpu_list, num_lwkcpus, cpu;
 
 		current->mos_process = mos_get_process();

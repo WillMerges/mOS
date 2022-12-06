@@ -1183,6 +1183,9 @@ int allocate_lwk_mm(void)
 	/* Initialize the vm stats area */
 	init_vm_stats(&lwk_mm->vm_stats);
 
+	/* Initialize reference counter */
+	atomic_set(&(lwk_mm->refcount), 1);
+
 	/*
 	 * Get a unique ID for this instance of LWK MM. No need of atomic
 	 * variable here as the caller already ensures mutual exclusion

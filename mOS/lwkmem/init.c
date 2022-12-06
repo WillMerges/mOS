@@ -1311,6 +1311,10 @@ static void lwkmem_process_exit(struct mos_process_t *mosp)
 	if (!lwk_mm)
 		return;
 
+    /* Other LWK process(es) still using this mm */
+	if (atomic_dec_return(&(lwk_mm->refcount)))
+		return;
+
 	/* Stop per process memory manager */
 	rc = exit_lwk_mm();
 	if (rc) {
