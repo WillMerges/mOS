@@ -117,7 +117,7 @@ struct mos_process_t {
 	/* Number of utility threads */
 	int num_util_threads;
 
-	/* number of processes sharing same resources */
+	/* number of processes sharing the same resources as this process */
 	atomic_t* resource_group_count;
 
 #ifdef CONFIG_MOS_LWKMEM

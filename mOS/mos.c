@@ -291,17 +291,16 @@ struct mos_process_t *mos_copy_process(struct mos_process_t* p)
 		}
 	}
 
-	// at this point we have a fresh mOS process
-
+	/* at this point we have a fresh mOS process to copy to */
 	process->num_lwkcpus = p->num_lwkcpus;
 	process->num_util_threads = p->num_util_threads;
 	process->yod_mm = p->yod_mm;
 
-	// copy the cpu masks to the new process
+	/* copy the cpu masks to the new process */
 	cpumask_copy(process->lwkcpus, p->lwkcpus);
 	cpumask_copy(process->utilcpus, p->utilcpus);
 
-	// set up the CPU sequence array
+	/* set up the CPU sequence array */
 	cpu_list = vmalloc(sizeof(int)*((process->num_lwkcpus)+1));
 	if (!cpu_list) {
 		goto bad_cpu_list_alloc;
